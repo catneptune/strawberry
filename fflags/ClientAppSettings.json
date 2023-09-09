@@ -1,0 +1,6 @@
+{
+  "DFIntTaskSchedulerTargetFps": 9999999,
+  "FFlagFixGraphicsQuality": true,
+  "FFlagCommitToGraphicsQualityFix": true,
+  "FFlagHandleAltEnterFullscreenManually": false
+}
