@@ -1,0 +1,78 @@
+#!/bin/sh -e
+
+# useful stuff
+
+directory="/Applications/Roblox.app/Contents/MacOS"
+
+log() {
+    RED='\033[0;91m'
+    NEUTRAL='\033[0m'
+    printf "${RED}> ${NEUTRAL}${1}\n"
+}
+
+run() {
+    command="$@"
+    echo "$command"
+    eval "$command"
+}
+
+# all functions above are purely misc
+
+usage() {
+    printf 'usage: \033[1;91m./strawberry%s\033[0m [option]\n\n'
+    printf 'options:\n'
+    printf ' init      start \033[1;91mstrawberry%s\033[0m and add fflags\n'
+    printf ' edit      edit fflags from the terminal\n'
+}
+
+edit() {
+    printf '\033[1;91mstrawberry%s\033[0m\n\n'
+    log 'This command is meant more for advanced users, if you do not know how to use this, press Control + X at the same time to exit nano.'
+    printf '\033[1;91m   Please read the message above, if you understand, press Enter to continue.%s\033[0m\n'
+    read
+    nano /Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json
+}
+
+init() {
+    printf '\033[1;91mstrawberry%s\033[0m\n\n'
+    if [ -d "$directory" ]; then
+        if [ ! -f "$directory/strawberry_patched" ]; then    
+            log 'Roblox found'
+            run cd $directory
+            log 'Removing any old ClientSettings folder'
+            run rm -rf ClientSettings
+            log 'Making ClientSettings folder and adding FFlags..'
+            run mkdir ClientSettings
+            cd ClientSettings
+            log 'Fetching FFlags..'
+            run curl -fLOs https://raw.githubusercontent.com/catneptune/strawberry/main/fflags/ClientAppSettings.json
+            cd ..
+            touch strawberry_patched
+            printf "\033[1;91mIMPORTANT: %s\033[0mRun \033[1;91m./strawberry%s\033[0m init everytime Roblox updates, else FFlags won't be added!\n"
+        else
+            printf '\033[1;91mstrawberry has already been installed!%s\033[0m\n\n'
+        fi
+    else
+        printf '\033[1;91mFATAL!%s\033[0m Roblox does not exist, installing it..\n'
+        run curl -fLOs https://setup.rbxcdn.com/mac/Roblox.dmg
+        run hdiutil mount -quiet Roblox.dmg
+        run open -a /Volumes/RobloxPlayerInstaller/RobloxPlayerInstaller.app
+        log "Roblox should've been installed, please rerun \033[1;91m./strawberry init%s\033[0m"
+        log "If you get any error along the lines of 'RobloxPlayerInstaller was blocked from use because it is not from an identified developer' and such, go to:\n"
+        echo "   \033[1;91mEarlier than Ventura:\033[0m Settings, Security and Privacy, and click Open Anyway"
+        echo "   \033[1;91mVentura and newer:\033[0m Settings, Privacy and Security, scroll down, then click Open Anyway\n"
+        exit 1
+    fi
+}
+
+main() {
+    action=$1
+
+    case "$action" in
+        init) init ;;
+        edit) edit ;;
+        *) usage ;;
+    esac
+}
+
+main "$@"
